@@ -16,7 +16,10 @@ router.post('/', async function(req, res) {
   }
   else { //사용자가 입력
     //중복회원 검사
-    let checkUserQuery = 'SELECT * FROM lasttrain.user WHERE user_id = ?';
+    let checkUserQuery = `
+    SELECT *
+    FROM lasttrain.user
+    WHERE user_id = ? `;
     let checkUserResult = await db.queryParam_Arr(checkUserQuery, [user_id]);
 
     // 잘못된 연결일 경우
@@ -32,6 +35,7 @@ router.post('/', async function(req, res) {
         
       console.log("length = 0!");
         var str = user_pwd;
+        //salt값 생성?
         crypto.randomBytes(32, async function(err, buffer) {
           if (err) {
             console.log(err);
@@ -45,17 +49,14 @@ router.post('/', async function(req, res) {
                 let pushUser = 'INSERT INTO lasttrain.user(user_id, user_pwd, user_email, user_name) VALUES(?, ?, ?, ?)';
                 //hash된 값을 db에 insert
                 let pushUserResult = await db.queryParam_Arr(pushUser, [user_id,hashed.toString('base64'), user_email, user_name]);
-                
                 if(!pushUserResult){
                   res.status(500).send({
                     "message" : "Internal Server Error"
                   }); 
                 }
                 else {
-                          
                   res.status(201).send ({
                     "message" : "Successfully sign up",
-                    // "data" : pushUserRe
                   });
                 }
               }
