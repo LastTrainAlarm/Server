@@ -18,7 +18,7 @@ router.post('/', async function(req, res) {
     //중복회원 검사
     let checkUserQuery = `
     SELECT *
-    FROM user
+    FROM lasttrain.user
     WHERE user_id = ? `;
     let checkUserResult = await db.queryParam_Arr(checkUserQuery, [user_id]);
 
@@ -32,9 +32,6 @@ router.post('/', async function(req, res) {
     else {
       if (checkUserResult.length == 0) {
         var str = user_pwd;
-        let hashAlgorithm = crypto.createHash('sha512');
-        let hashing = hashAlgorithm.update(str);
-        let hashedString = hashing.digest('base64');
         //salt값 생성?
         crypto.randomBytes(32, async function(err, buffer) {
           if (err) {
@@ -48,11 +45,11 @@ router.post('/', async function(req, res) {
               } else {
                 //DB에 INSERT
                 let pushUser = `
-                INSERT INTO user(user_id, user_pwd, user_email, user_name)
+                INSERT INTO lasttrain.user(user_id, user_pwd, user_email, user_name)
                 VALUES(?, ?, ?, ?)
                 `;
                 //hash된 값을 db에 insert
-                let pushUserResult = await db.queryParam_Arr(checkUserQuery, [user_id], [hashed.toString('base64')], [user_email], [user_name]);
+                let pushUserResult = await db.queryParam_Arr(pushUser, [user_id, hashed.toString('base64'), user_email, user_name]);
               }
             });
           }
