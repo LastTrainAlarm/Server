@@ -40,15 +40,15 @@ router.post('/', async function(req, res) {
           if (err) {
             console.log(err);
           } else {
-            buffer.toString('base64');
-            crypto.pbkdf2(str, buffer.toString('base64'), 100000, 64, 'sha512', async function(err, hashed) {
+            const salt = buffer.toString('base64');
+            crypto.pbkdf2(str, salt, 100000, 64, 'sha512', async function(err, hashed) {
               if (err) {
                 console.log(err);
               } else {
                 //DB에 INSERT
-                let pushUser = 'INSERT INTO lasttrain.user(user_id, user_pwd, user_email, user_name) VALUES(?, ?, ?, ?)';
+                let pushUser = 'INSERT INTO lasttrain.user(user_id, user_pwd, user_email, user_name, user_salt) VALUES(?, ?, ?, ?, ?)';
                 //hash된 값을 db에 insert
-                let pushUserResult = await db.queryParam_Arr(pushUser, [user_id,hashed.toString('base64'), user_email, user_name]);
+                let pushUserResult = await db.queryParam_Arr(pushUser, [user_id,hashed.toString('base64'), user_email, user_name, salt]);
                 if(!pushUserResult){
                   res.status(500).send({
                     "message" : "Internal Server Error"
