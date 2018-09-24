@@ -1,6 +1,12 @@
 var express = require('express');
+// var app = express();
 var router = express.Router();
+// var bodyParser = require('body-parser');
+// var db = require('../../module/pool.js'); 
+// var scretkey = require('../../config/secretKey.js')
 var sdata = require('../../data/seoul_subway_info.json'); 
+var querystring = require('querystring');
+//var postman = require('postman');
 
 // var encoded = encodeURIComponent('영등포');
 // postman.setEnvironmentVariable("encoded", encoded);
