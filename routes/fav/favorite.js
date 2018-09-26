@@ -39,8 +39,8 @@ router.post('/', async function(req, res) {
                 FROM lasttrain.favorite
                 WHERE keyword = ?`;
                 let checkStnResult = await db.queryParam_Arr(checkStn, [keyword]);
-                
-                if (!checkStnResult) { // 페이보릿에 역 없으면 즐찾 추가
+                console.log(checkStnResult[0]);
+                if (checkStnResult[0].length == 0) { // 페이보릿에 역 없으면 즐찾 추가
                     let pushFav = `
                     INSERT INTO lasttrain.favorite(fav_name, user_idx)
                     VALUES(?, ?)
@@ -83,31 +83,44 @@ router.post('/', async function(req, res) {
  router.get('/', async function(req, res) {
     let token = req.headers.token;
     let decoded = jwt.verify(token);
-    let user_idx = decoded.user_idx;
+    let user_idx;
+    let res_arr = [];
 
     if(!decoded) {
         res.status(400).send({
             "message" : "Null Value"
         });
+        return; 
     }
     else {
-        let getFav = `
-        SELECT *
-        FROM lasttrain.favorite
-        WHERE user_idx = ?
-        `;
-        let getFavResult = await db.queryParam_Arr(getFav, [user_idx]);
-        if (!getFavResult) {    
-            res.status(500).send({
-                "message" : "Internal Server Error"
-            });
-        }
-        else {
-            res.status(201).send ({
-                "message" : "Successfully register favorite station",
-                "data" : getFavResult.fav_name // 이것이 아닌가봉가!!!
-            });
-        }
+        user_idx = decoded.user_idx;
     }
+
+    let getFav = `
+    SELECT *
+    FROM lasttrain.favorite
+    WHERE user_idx = ?
+    `;
+    let getFavResult = await db.queryParam_Arr(getFav, [user_idx]);
+    if (!getFavResult) {    
+        res.status(500).send({
+            "message" : "Internal Server Error"
+        });
+    }
+    else {
+        for(let i=0; i<getFavResult.length; i++){
+            // data_res = {
+            //     station_name : fav_name
+            // }
+            res_arr = res_arr.concat(getFavResult[i].fav_name); 
+        }
+
+        console.log(getFavResult);
+        res.status(200).send ({
+            "message" : "Successfully get favorite station",
+            "data" :  res_arr
+        });
+    }
+    
  });
  module.exports = router;

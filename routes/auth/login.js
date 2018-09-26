@@ -22,9 +22,14 @@ router.post('/', async function(req, res) {
         FROM lasttrain.user
         WHERE user_id = ? `;
         let checkIDResult = await db.queryParam_Arr(checkID, [user_id]);
+        if(!checkIDResult){
+            res.status(500).send({
+                message : "Internal Server Error"
+            }); 
+        }
 
         //아이디가 없어
-        if (!checkIDResult) {
+        if (checkIDResult.length == 0) {
             res.status(400).send ({
                 "message" : "Login Failed - incorrect ID"
             });

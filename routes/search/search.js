@@ -12,24 +12,33 @@ var querystring = require('querystring');
 // postman.setEnvironmentVariable("encoded", encoded);
 
 //'/:'+querystring.escape('keyword')
-router.get('/:'+querystring.escape('keyword'), async function(req, res) {
-    console.log('시발');
+router.get('/:keyword', async function(req, res) {
     let keyword = req.params.keyword; 
 
-    console.log(keyword);    
+    // console.log(keyword);    
     // querystring.unescape(keyword);
 
     if(!keyword)
     {
         res.status(400).send({
-            message : "Incorrect Input"
+            message : "Null Values"
         }); 
     }
     else {
-        for (let i=0; i<sdata.DATA.length; i++){
+        let i;
+        for (i=0; i<sdata.DATA.length; i++){
             if(sdata.DATA[i].station_nm == keyword){
-               
+               console.log(sdata.DATA[i]);
+               res.status(200).send({
+                   message : "Successfully search subway",
+                   data : sdata.DATA[i]
+               }); 
             }
+        }
+        if(i == sdata.DATA.length -1){
+            res.status(400).send({
+                message : "Incorrect Input"
+            })
         }
     }
 });
