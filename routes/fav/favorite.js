@@ -18,13 +18,17 @@ router.post('/', async function(req, res) {
             res.status(500).send({
                 "message" : "Internal Server Error"
             });
-        }
+        }   
         else {
             let pushFav = `
             INSERT INTO lasttrain.favorite(fav_name, user_idx)
             VALUES(?, ?)
             `;
-            let pushFavResult = db.queryParam_Arr(pushFav, [keyword, decoded]);
+
+            let checkFav = 'SELECT * FROM lasttrain.favorite' 
+            let checkFavRes = await db.queryParam_None(checkFav); 
+            console.log(checkFavRes);
+            let pushFavResult = await db.queryParam_Arr(pushFav, [keyword, decoded]);
             if(!pushFavResult) {
                 res.status(500).send({
                     "message" : "Internal Server Error"
