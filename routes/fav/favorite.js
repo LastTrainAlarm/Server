@@ -37,10 +37,11 @@ router.post('/', async function(req, res) {
                 let checkStn = `
                 SELECT *
                 FROM lasttrain.favorite
-                WHERE keyword = ?`;
+                WHERE fav_name = ?`;
+
                 let checkStnResult = await db.queryParam_Arr(checkStn, [keyword]);
-                console.log(checkStnResult[0]);
-                if (checkStnResult[0].length == 0) { // 페이보릿에 역 없으면 즐찾 추가
+
+                if (checkStnResult.length == 0) { // 페이보릿에 역 없으면 즐찾 추가
                     let pushFav = `
                     INSERT INTO lasttrain.favorite(fav_name, user_idx)
                     VALUES(?, ?)
@@ -52,7 +53,9 @@ router.post('/', async function(req, res) {
                         });
                     }
                     else {
-                        console.log(pushFavResult);
+                        let checkFav = 'SELECT * FROM lasttrain.favorite';
+                        let checkFavRes = await db.queryParam_Arr(checkFav);
+                        console.log(checkFavRes);
                         res.status(201).send ({
                             "message" : "Successfully register favorite station"
                         });
@@ -61,10 +64,15 @@ router.post('/', async function(req, res) {
                 else { // 역 있으면 즐찾 해제
                     let delFav = `
                     DELETE FROM lasttrain.favorite
-                    WHERE keyword = ?
+                    WHERE fav_name = ?
                     `;
                     let delFavResult = await db.queryParam_Arr(delFav, [keyword]);
-                    console.log(delFavResult);
+                    let checkFav = 'SELECT * FROM lasttrain.favorite';
+                        let checkFavRes = await db.queryParam_Arr(checkFav);
+                        console.log(checkFavRes);
+                    res.status(201).send ( {
+                        "message" : "Successfully clear favorite station"
+                    });
                 }
                 
             }
@@ -75,9 +83,6 @@ router.post('/', async function(req, res) {
             });
         }
     }
-    let checkFav = 'SELECT * FROM lasttrain.favorite' 
-    let checkFavRes = await db.queryParam_None(checkFav);
-    console.log(checkFavRes);
  });
 
  router.get('/', async function(req, res) {
@@ -115,12 +120,11 @@ router.post('/', async function(req, res) {
             res_arr = res_arr.concat(getFavResult[i].fav_name); 
         }
 
-        console.log(getFavResult);
+        //console.log(getFavResult);
         res.status(200).send ({
             "message" : "Successfully get favorite station",
             "data" :  res_arr
         });
     }
-    
  });
  module.exports = router;
