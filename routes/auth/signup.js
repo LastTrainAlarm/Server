@@ -30,20 +30,16 @@ router.post('/', async function(req, res) {
     }
     //사용자 아이디가 중복이거나 없어서 가입 가능하거나.
     else {
-      console.log(checkUserResult);
       if (checkUserResult.length == 0) {
         
-      console.log("length = 0!");
         var str = user_pwd;
         //salt값 생성?
         crypto.randomBytes(32, async function(err, buffer) {
           if (err) {
-            console.log(err);
           } else {
             const salt = buffer.toString('base64');
             crypto.pbkdf2(str, salt, 100000, 64, 'sha512', async function(err, hashed) {
               if (err) {
-                console.log(err);
               } else {
                 //DB에 INSERT
                 let pushUser = 'INSERT INTO lasttrain.user(user_id, user_pwd, user_email, user_name, user_salt) VALUES(?, ?, ?, ?, ?)';

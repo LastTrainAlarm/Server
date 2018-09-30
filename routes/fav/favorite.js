@@ -55,7 +55,6 @@ router.put('/', async function(req, res) {
                     else {
                         let checkFav = 'SELECT * FROM lasttrain.favorite';
                         let checkFavRes = await db.queryParam_Arr(checkFav);
-                        console.log(checkFavRes);
                         res.status(201).send ({
                             "message" : "Successfully register favorite station"
                         });
@@ -69,7 +68,6 @@ router.put('/', async function(req, res) {
                     let delFavResult = await db.queryParam_Arr(delFav, [keyword]);
                     let checkFav = 'SELECT * FROM lasttrain.favorite';
                         let checkFavRes = await db.queryParam_Arr(checkFav);
-                        console.log(checkFavRes);
                     res.status(201).send ( {
                         "message" : "Successfully clear favorite station"
                     });
@@ -120,7 +118,6 @@ router.put('/', async function(req, res) {
             res_arr = res_arr.concat(getFavResult[i].fav_name); 
         }
 
-        //console.log(getFavResult);
         res.status(200).send ({
             "message" : "Successfully get favorite station",
             "data" :  res_arr

@@ -77,7 +77,6 @@ router.get('/:y/:x', async function(req,res){
                     for(let j=0; j<checkFavRes.length; j++){
                         favnm = favnm.concat(checkFavRes[j].fav_name);
                     }
-                    console.log(favnm);
                 }
 
                 for (let i=0;i<body.documents.length; i++){
@@ -86,16 +85,13 @@ router.get('/:y/:x', async function(req,res){
                     var st_info = name.split('역 ');
                     
                     if(!name_arr.includes(st_info[0])){   
-                        console.log(user_idx);
                         if(user_idx!=null){
-                            console.log("ㅅㅂ");
                             if(favnm.includes(st_info[0]))
                                 fav_onoff = 1; 
                             else 
                                 fav_onoff = 0; 
                         }
                         else {
-                            console.log("ㅄ");
                             fav_onoff = null;
                         }
                         name_arr = name_arr.concat(st_info[0]);
@@ -108,9 +104,6 @@ router.get('/:y/:x', async function(req,res){
                         data_arr = data_arr.concat(data_res);
 
                     }
-
-                // console.log(checkFavRes);
-
                 }
             }
 

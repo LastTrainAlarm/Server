@@ -16,9 +16,7 @@ router.get('/:keyword', async function(req, res) {
     let keyword = (req.params.keyword); 
     let token = req.headers.token; 
     let user_idx, decoded ;
-    console.log(keyword);    
     enc.decode(keyword);
-    console.log(keyword);
 
     let name_arr = [];
     let res_arr = []; 
