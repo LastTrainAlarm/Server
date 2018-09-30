@@ -5,7 +5,7 @@ var jwt = require('../../module/jwt.js');
 let subway = require('../../data/seoul_subway_info.json');
 //const secretKey = require('../config/secretKey.js').secret;
 
-router.post('/', async function(req, res) {
+router.put('/', async function(req, res) {
     let token = req.headers.token;
     let keyword = req.body.keyword;
     let decoded = jwt.verify(token);
