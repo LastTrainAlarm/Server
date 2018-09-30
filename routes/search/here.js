@@ -3,11 +3,32 @@ var router = express.Router();
 var key = require('../../config/secretKey.js'); 
 var sdata = require('../../data/seoul_subway_info.json');
 var request = require('request');
+const jwt = require('../../module/jwt.js'); 
+const db = require('../../module/pool.js');
 
 
-router.get('/:x/:y', async function(req,res){
+router.get('/:y/:x', async function(req,res){
     let x = req.params.x;
     let y = req.params.y;
+    let token = req.headers.token; 
+    let user_idx, decoded; 
+
+    //token 입력이 없을 떄
+    if(!token){
+        user_idx = null; 
+    }
+    else {
+        decoded = jwt.verify(token);
+        if(decoded == -1){
+            res.status(400).send({
+                message : "Token Error"
+            }); 
+            return; 
+        }
+        else {
+            user_idx = decoded.user_idx; 
+        }
+    }
     
     let options = {
         host : 'dapi.kakao.com',
@@ -22,62 +43,83 @@ router.get('/:x/:y', async function(req,res){
             query : '지하철역',
             y : y,
             x : x,
-            radius : '3000',
+            radius : '2000',
         }
     }; 
     let data_arr = [];
     let name_arr = []; 
-    request(options, function(err, response, body){
+    request(options, async function(err, response, body){
         if(err){
             res.status(500).send({
-                message : "Internal Server Error"
+                message : "Internal Server Error1"
             }); 
         }
         else{
             body = JSON.parse(body); 
             if(!err && response.statusCode == 200){
+                let fav_onoff;
+                let checkFavRes;
+                if(user_idx == null){
+                    checkFavRes = []; 
+                }
+                else {
+                    let checkFav = 'SELECT * FROM favorite WHERE user_idx = ?';
+                    checkFavRes = await db.queryParam_Arr(checkFav, [user_idx]); 
+                }
+                let favnm=[]; 
+                if(!checkFavRes){
+                    res.status(500).send({
+                        message : "Internal Server Error", 
+                    });
+                    return; 
+                }
+                else {
+                    for(let j=0; j<checkFavRes.length; j++){
+                        favnm = favnm.concat(checkFavRes[j].fav_name);
+                    }
+                    console.log(favnm);
+                }
+
                 for (let i=0;i<body.documents.length; i++){
                     // data_arr = data_arr.concat(body.documents[i]); 
                     var name = body.documents[i].place_name; 
-                    var st_info = name.split(' ');
-                    console.log(st_info[0]); 
-                    console.log(st_info[1]);
-                    var st_name = st_info[0].substr(0,st_info[0].length-1);
+                    var st_info = name.split('역 ');
                     
-                    if(!name_arr.includes(st_name)){
-                        name_arr = name_arr.concat(st_name);
-                    }
-                }
-
-
-
-                for (let j=0; j<sdata.DATA.length; j++){
-                    if(name_arr.includes(sdata.DATA[j].station_nm))
-                    {
-                        var data_res = {
-                            "station_name" : sdata.DATA[j].station_nm, 
-                            "station_code" : sdata.DATA[j].station_cd, 
-                            "station_xpoint_wgs" : sdata.DATA[j].xpoint_wgs,
-                            "station_ypoint_wgs" : sdata.DATA[j].ypoint_wgs,
-                            "station_line" : sdata.DATA[j].line_num,
+                    if(!name_arr.includes(st_info[0])){   
+                        console.log(user_idx);
+                        if(user_idx!=null){
+                            console.log("ㅅㅂ");
+                            if(favnm.includes(st_info[0]))
+                                fav_onoff = 1; 
+                            else 
+                                fav_onoff = 0; 
                         }
-                        if(data_arr.staion_name != (data_res.station_name)){
-                            data_arr = data_arr.concat(data_res);
+                        else {
+                            console.log("ㅄ");
+                            fav_onoff = null;
                         }
-                         
-                    }
-                }
-                // for(let s=0; s<name_arr)
+                        name_arr = name_arr.concat(st_info[0]);
+                        data_res = {
+                            station_name : st_info[0],
+                            station_x : body.documents[i].y,
+                            station_y : body.documents[i].x,
+                            fav_onoff : fav_onoff,
+                        }
+                        data_arr = data_arr.concat(data_res);
 
-                console.log(name_arr);
-                res.status(200).send({
-                    message : "Successfully search stations in here",
-                    data : data_arr,
-                });
+                    }
+
+                // console.log(checkFavRes);
+
+                }
             }
+
+            res.status(200).send({
+                message : "Successfully search stations in here",
+                data : data_arr,
+            });
         }
-    
-})
+    })
 })
 
 module.exports = router;
